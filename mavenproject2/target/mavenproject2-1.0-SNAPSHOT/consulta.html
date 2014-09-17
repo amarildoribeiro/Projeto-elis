@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <meta charset="utf-8">
+      <title>Elis - Escrita  da Línguas   de  Sinais</title>
+      <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+      <!-- Optional theme -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+      <style type="text/css">
+         @import url(http://fonts.googleapis.com/css?family=Antic+Slab);
+
+html, body {
+    height:100%;
+}
+h1 {
+    font-family:'Antic Slab', serif;
+    font-size:80px;
+    color:#000000;
+}
+.lead {
+    color:#000000;
+}
+/* Custom container */
+.container-full {
+    margin: 0 auto;
+    width: 100%;
+    min-height:100%;
+    background-color:#7397BA;
+    color:#000000;
+    overflow:hidden;
+    font-family:'Antic Slab', serif;
+
+    
+}
+.container-full a {
+    color:#DEDBCA;
+    text-decoration:none;
+    font-family:'Antic Slab', serif;
+}
+.v-center {
+    margin-top:7%;
+} 
+      
+ #form {
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    font-family:'Antic Slab', serif;
+}
+
+#saida_formatada {
+    width: 100%;
+    border-radius: 4px;
+    text-align: center;
+    font-family:"Elis";
+    font-size: 22px;
+}
+
+
+td.elis{
+    font-family:"Elis";
+}
+ 
+      </style>
+      <script type="text/javascript">
+         $(document).ready(function() 
+         {
+         
+         var text    = $('#input_text'); 
+         
+         var result  = $('#saida_formatada'); 
+         
+         var saida;
+         var tipo_consulta;
+         var json;
+         
+         $('#input_text').keydown(function(e){  // pega o que foi digitado pelo usuario
+         setTimeout(function() {
+          
+         if ((e.which <= 90 && e.which >= 48) || (e.which >=96 && e.which <= 111)   )
+         {
+         
+            var parametro = text.val().slice(-1);      
+          
+            formatapalavra(parametro);
+          
+            saida = $('#saida_formatada').html(); 
+          
+            //$('#saida').text(saida);
+         }     
+          
+         }, 0); // tempo de resposta
+         
+             });
+         
+         
+         $('input').on('click', function() {  // altera a fonte da caixa de texto
+         
+            if ($("input:checked").val() === "portugues"){ // portugues
+              $('#input_text').css("font-family", "Arial");
+              tipo_consulta = 1;
+            }
+            else {
+            
+              $('#input_text').css("font-family", "Elis"); // elis
+              tipo_consulta = 2;
+            }
+            
+         });
+         
+         
+         
+         function formatapalavra(parametro)            // formata o que foi digitado com as formatações selecionadas
+         {  
+         if ($('#sup').prop('checked') && !$('#subli').prop('checked')) {    // apenas SUP
+         result.append("<sup>"+parametro+"</sup>"); }
+         
+         else if (!$('#sup').prop('checked') && $('#subli').prop('checked')) { // apenas U
+         result.append("<u>"+parametro+"</u>"); }
+         
+         else if ($('#sup').prop('checked') && $('#subli').prop('checked')) {  // U e SUP
+         result.append("<sup>"+"<u>"+parametro+"</u>"+"</sup>"); }
+         
+         else {                                                  // sem formatação
+         result.append(parametro); }
+         
+         };
+         
+         
+         $('#limpar').click(function() {
+         text.empty();
+         result.empty();
+         $('#input_text').text("");
+         $('#saida_formatada').text(""); 
+         $('#resultado').text("");
+         });
+         
+         
+           
+            $('#enviar').click(function () {
+            $.ajax({
+                    type: "GET",
+                    url: "http://localhost:8084/projeto/webresources/elis/consulta?",
+                    data:{
+                        tipo_consulta : tipo_consulta,
+                        palavra       : saida
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                            $('#resultado').empty();
+                            
+                            var pt   = data.palavra_pt.length;
+                            var elis = data.palavra_elis.length;
+                            $('#resultado').append("<tr><td><b>Portugês</b></td><td><b>Elis</b></td></tr>");
+                            for ( var i = 0, l = pt; i < l; i++ ) {
+                                $('#resultado').append("<tr><td>"+data.palavra_pt[i]+"</td>"+"<td class=\"elis\">"+data.palavra_elis[i]+"</td></tr>");
+                            }
+                            
+                           
+                            
+                    },
+                    error: function (xhr, status, error) {
+                            alert(error);
+                    }
+                });
+
+             });
+
+   
+         });
+      </script>
+   </head>
+   <!-- HTML code from Bootply.com editor -->
+   <body>
+     <div class="container"></div>
+<div class="container-full">
+    <div class="row">
+        <div class="col-lg-12 text-center v-center">
+             <h1 class="">Elis</h1>
+
+            <p class="lead">Escrita da Línguas de Sinais</p>
+            <br class="">
+        </div>
+        <div id="form" class="container">
+            <div class="radio">
+                <label>
+                    <input type="radio" name="radio" id="pt" value="portugues" checked><b>Português para Elis</b></label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="radio" id="elis" value="elis" checked><b>Elis para Português</b></label>
+            </div>
+            <div>
+                <input id="input_text" class="form-control" />
+            </div>
+            <div id="saida_formatada"></div>
+            <div id="saida"></div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="sup" name="sup" value="sup"><b>Sobrescrito</b></label>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="subli" name="subli" value="subli"><b>Sublinhado</b></label>
+            </div>
+            <br>
+            <button id="limpar" class="btn btn-primary">Limpar Tudo</button>
+            <button id="enviar" class="btn btn-primary">Traduzir</button>
+            <br>
+            <br>
+            <table id="resultado" class="table table-hover table-bordered"></table>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+</div>
+   </body>
+</html>
+
